@@ -1,6 +1,6 @@
-import { property as txProps } from '@tenoxui/property'
+import { property as txProps, type Property } from '@tenoxui/property'
 
-const properties = {
+const properties: Property = {
   bgc: 'backgroundColor'
 }
 
