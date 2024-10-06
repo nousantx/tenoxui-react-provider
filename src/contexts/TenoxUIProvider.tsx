@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useLayoutEffect, useMemo } from 'react'
+import React, { createContext, useLayoutEffect, useMemo } from 'react'
 import { makeTenoxUI, MakeTenoxUIParams } from '@tenoxui/core'
 import { property as txProps } from '../lib/tenoxui/property'
 import { classes as txClasses } from '../lib/tenoxui/classes'
