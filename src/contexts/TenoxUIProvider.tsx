@@ -1,5 +1,6 @@
-import React, { createContext, useLayoutEffect, useMemo } from 'react'
+import React, { createContext, useContext, useLayoutEffect, useMemo } from 'react'
 import { makeTenoxUI, MakeTenoxUIParams } from '@tenoxui/core'
+import { type Property } from '@tenoxui/property'
 import { property as txProps } from '../lib/tenoxui/property'
 import { classes as txClasses } from '../lib/tenoxui/classes'
 import { values as txValues } from '../lib/tenoxui/values'
@@ -12,25 +13,33 @@ interface TenoxUIProviderProps extends Partial<TenoxUIConfig> {
 
 const TenoxUIContext = createContext<TenoxUIConfig | null>(null)
 
-export const TenoxUIProvider: React.FC<TenoxUIProviderProps> = ({
+export function useConfig({
   property = {},
   values = {},
   classes = {},
-  breakpoints = [],
-  children
-}) => {
-  const config: TenoxUIConfig = useMemo(
+  breakpoints = []
+}: Partial<TenoxUIConfig> = {}): TenoxUIConfig {
+  return useMemo(
     () => ({
-      property: { ...txProps, ...property },
+      property: { ...txProps, ...property } as Property,
       values: merge(txValues, values),
       classes: merge(txClasses, classes),
       breakpoints
     }),
     [property, values, classes, breakpoints]
   )
+}
+
+export function useStyler({
+  property = {},
+  values = {},
+  classes = {},
+  breakpoints = []
+}: Partial<TenoxUIConfig> = {}): TenoxUIConfig {
+  const config = useConfig({ property, values, classes, breakpoints })
 
   useLayoutEffect(() => {
-    document.querySelectorAll('*[class]').forEach((element) => {
+    document.querySelectorAll('*[class]').forEach(element => {
       new makeTenoxUI({
         element: element as HTMLElement,
         ...config
@@ -38,5 +47,25 @@ export const TenoxUIProvider: React.FC<TenoxUIProviderProps> = ({
     })
   }, [config])
 
+  return config
+}
+
+export const TenoxUIProvider: React.FC<TenoxUIProviderProps> = ({
+  property = {},
+  values = {},
+  classes = {},
+  breakpoints = [],
+  children
+}) => {
+  const config = useStyler({ property, values, classes, breakpoints })
+
   return <TenoxUIContext.Provider value={config}>{children}</TenoxUIContext.Provider>
+}
+
+export const useTenoxUI = (): TenoxUIConfig => {
+  const context = useContext(TenoxUIContext)
+  if (context === null) {
+    throw new Error('useTenoxUI must be used within a TenoxUIProvider')
+  }
+  return context
 }
